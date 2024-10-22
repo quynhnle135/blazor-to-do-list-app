@@ -1,0 +1,72 @@
+@page "/todos"
+
+<h1>To Do List</h1>
+
+<EditForm Model="@newTodo" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+
+    <div>
+        <label for="title">Title:</label>
+        <InputText @bind-Value="newTodo.Title"/>
+    </div>
+
+    <div>
+        <label for="description">Description:</label>
+        <InputText @bind-Value="newTodo.Description"/>
+    </div>
+
+    <div>
+        <label for="status">Status:</label>
+        <InputSelect @bind-Value="newTodo.Status">
+        <option value="Pending">Pending</option>
+        <option value="OnGoing">OnGoing</option>
+        <option value="Closed">Closed</option>
+        </InputSelect>
+    </div>
+
+    <div>
+        <label for="priority">Priority</label>
+        <InputSelect @bind-Value="newTodo.Priority">
+            <option value="Minor">Minor</option>
+            <option value="Major">Major</option>
+            <option value="Urgent">Urgent</option>
+        </InputSelect>
+    </div>
+    <button type="submit">Add</button>
+</EditForm>
+
+<h3>You have @todos.Count(t => t.Status == TodoStatus.Pending || t.Status == TodoStatus.OnGoing) task(s) to do.</h3>
+<ul>
+        @foreach (var todo in todos) {
+            <li>
+                <span>@todo.Title - @todo.Priority - @todo.Status</span>
+                <button @onclick="() => RemoveTodo(todo)">Delete</button>
+            </li>
+            
+        }
+</ul>
+
+@code {
+    public Todo newTodo = new Todo();
+    public List<Todo> todos = new();
+    
+    public void HandleValidSubmit() {
+        todos.Add(new Todo() {
+            Title = newTodo.Title,
+            Description = newTodo.Description, 
+            Status = newTodo.Status, 
+            Priority = newTodo.Priority
+        });
+    }
+
+    public void MarkAsCompleted(Todo todo) {
+        todo.Status = TodoStatus.Closed;
+    }
+
+    public void RemoveTodo(Todo todo) {
+        todos.Remove(todo);
+    }
+
+
+}
