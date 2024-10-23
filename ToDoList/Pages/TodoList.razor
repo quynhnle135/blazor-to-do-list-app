@@ -2,6 +2,9 @@
 
 <h1 class="text-lg font-extrabold text-red-800">To Do List</h1>
 
+<button @onclick="SortByPriority">Sort By Priority</button>
+<button @onclick="SortByStatus">Sort By Status</button>
+
 <EditForm Model="@newTodo" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator/>
     <ValidationSummary/>
@@ -43,14 +46,14 @@
                @if(todo.Status == TodoStatus.Closed) {
                     <span class="line-through text-green-500">@todo.Title</span>
                } else {
-                    <input type="checkbox" @onclick="()=>MarkAsCompleted(todo)" class="mr-2"/>
+                    <input type="checkbox" @onclick="()=>MarkAsCompleted(todo)"/>
                     <span class="text-sm font-medium @((todo.Status == TodoStatus.Pending) ? "text-red-500" : "text-orange-500")">@todo.Title</span>
                }
 
                @if(!string.IsNullOrWhiteSpace(todo.Description)) {
-                    <p class="ml-5 text-sm text-gray-500">@todo.Description</p>
+                    <p class=" text-sm text-gray-500">@todo.Description</p>
                }
-               <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded" @onclick="()=>RemoveTodo(todo)">Delete</button>
+               <button class="bg-red-500 hover:bg-red-700 text-white font-bold rounded" @onclick="()=>RemoveTodo(todo)">Delete</button>
             </li>
             
         }
@@ -77,5 +80,26 @@
         todos.Remove(todo);
     }
 
+    private int GetPriorityValue(TodoPriority priority) {
+        return priority switch {
+            TodoPriority.Minor => 1,
+            TodoPriority.Major => 2,
+            TodoPriority.Urgent => 3
+        };
+    }
+    public void SortByPriority() {
+        todos = todos.OrderByDescending(t => GetPriorityValue(t.Priority)).ToList();
+    }
 
+    private int GetStatusValue(TodoStatus status) {
+        return status switch {
+            TodoStatus.Pending => 1,
+            TodoStatus.OnGoing => 2,
+            TodoStatus.Closed => 3
+        };
+    }
+
+    public void SortByStatus() {
+        todos = todos.OrderBy(t => GetStatusValue(t.Status)).ToList();
+    }
 }
