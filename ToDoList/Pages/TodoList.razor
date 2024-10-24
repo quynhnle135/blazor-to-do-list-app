@@ -1,63 +1,83 @@
 @page "/todos"
 
-<h1 class="text-lg font-extrabold text-red-800">To Do List</h1>
+<!--Form-->
+<div class="w-full max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow sm:p-6 md:p-8 dark:bg-gray-800 dark:border-gray-700">
+    <h1 class="text-3xl font-extrabold text-black-800 mb-5 text-center">To Do List</h1>
 
-<button @onclick="SortByPriority">Sort By Priority</button>
-<button @onclick="SortByStatus">Sort By Status</button>
+    <EditForm class="space-y-6" Model="@newTodo" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
 
-<EditForm Model="@newTodo" OnValidSubmit="HandleValidSubmit">
-    <DataAnnotationsValidator/>
-    <ValidationSummary/>
+        <div>
+            <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="title">Title:</label>
+            <InputText class="appearance-none block bg-gray-200 text-gray-700 border border-black-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white w-full" @bind-Value="newTodo.Title"/>
+        </div>
 
-    <div>
-        <label for="title">Title:</label>
-        <InputText @bind-Value="newTodo.Title"/>
+        <div>
+            <label class="block uppercase tracking-wide text-gray-700 text-sm font-bold mb-2" for="description">Description:</label>
+            <InputText class="apperance-none block bg-gray-200 text-gray-700 border border-black-500 rounded py-2 px-4 mb-3 focus:outline-none focus:bg-white w-full" @bind-Value="newTodo.Description"/>
+        </div>
+
+        <div>
+            <label class="block uppercase tracking-wide text-gray-700 text-sm font-bold mb-2" for="status">Status:</label>
+            <InputSelect class="block bg-gray-200 text-gray-700 border border-black-500 rounded py-2 px-4 w-full" @bind-Value="newTodo.Status">
+            <option value="Pending">Pending</option>
+            <option value="OnGoing">OnGoing</option>
+            <option value="Closed">Closed</option>
+            </InputSelect>
+        </div>
+
+        <div>
+            <label class="block uppercase tracking-wide text-gray-700 text-sm font-bold mb-2" for="priority">Priority</label>
+            <InputSelect class="block bg-gray-200 text-gray-700 border border-black-500 rounded py-2 px-4 w-full" @bind-Value="newTodo.Priority">
+                <option value="Minor">Minor</option>
+                <option value="Major">Major</option>
+                <option value="Urgent">Urgent</option>
+            </InputSelect>
+        </div>
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full w-full" type="submit">Add new task</button>
+    </EditForm>
+</div>
+
+
+<!--Output-->
+<div class="w-1/2 mt-10">
+    <div class="flex justify-between items-center">
+        <h3 class="text-3xl font-bold text-black-800 tracking-wide">You have @todos.Count(t => t.Status == TodoStatus.Pending || t.Status == TodoStatus.OnGoing) task(s) to do.</h3>
+        <div>
+            <button class="text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2" @onclick="SortByPriority">Sort by priority</button>
+            <button type="button" class="text-gray-900 bg-gradient-to-r from-red-200 via-red-300 to-yellow-200 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-red-100 dark:focus:ring-red-400 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2" @onclick="SortByStatus">Sort by status</button>
+        </div>
     </div>
 
-    <div>
-        <label for="description">Description:</label>
-        <InputText @bind-Value="newTodo.Description"/>
-    </div>
-
-    <div>
-        <label for="status">Status:</label>
-        <InputSelect @bind-Value="newTodo.Status">
-        <option value="Pending">Pending</option>
-        <option value="OnGoing">OnGoing</option>
-        <option value="Closed">Closed</option>
-        </InputSelect>
-    </div>
-
-    <div>
-        <label for="priority">Priority</label>
-        <InputSelect @bind-Value="newTodo.Priority">
-            <option value="Minor">Minor</option>
-            <option value="Major">Major</option>
-            <option value="Urgent">Urgent</option>
-        </InputSelect>
-    </div>
-    <button class="" type="submit">Add</button>
-</EditForm>
-
-<h3 class="text-lg font-bold text-gray-800">You have @todos.Count(t => t.Status == TodoStatus.Pending || t.Status == TodoStatus.OnGoing) task(s) to do.</h3>
-<ul>
+    <ul>
         @foreach (var todo in todos) {
-            <li class="flex justify-between items-center py-2">
-               @if(todo.Status == TodoStatus.Closed) {
-                    <span class="line-through text-green-500">@todo.Title</span>
-               } else {
-                    <input type="checkbox" @onclick="()=>MarkAsCompleted(todo)"/>
-                    <span class="text-sm font-medium @((todo.Status == TodoStatus.Pending) ? "text-red-500" : "text-orange-500")">@todo.Title</span>
-               }
+            <li class="flex justify-between gap-2 items-center mt-3">
+                @if(todo.Status == TodoStatus.Closed) {
+                    <div>
+                        <input type="checkbox" checked class="mr-5">
+                        <span class="line-through text-green-500 text-lg font-bold">@todo.Title</span>
+                    </div>
+                } else {
+                    <div>
+                        <input type="checkbox" @onclick="()=>MarkAsCompleted(todo)" class="mr-5"/>
+                        <span class="font-medium @((todo.Status == TodoStatus.Pending) ? "text-red-500" : "text-orange-500")">@todo.Title</span>
+                    </div>
+                }
 
-               @if(!string.IsNullOrWhiteSpace(todo.Description)) {
-                    <p class=" text-sm text-gray-500">@todo.Description</p>
-               }
-               <button class="bg-red-500 hover:bg-red-700 text-white font-bold rounded" @onclick="()=>RemoveTodo(todo)">Delete</button>
+                @if(!string.IsNullOrWhiteSpace(todo.Description)) {
+                    <p class="text-sm text-gray-500">@todo.Description</p>
+                } else {
+                    <p class="text-sm text-gray-500">No description included.</p>
+                }
+                <a @onclick="() => RemoveTodo(todo)" class="font-extrabold text-lg text-red-700">X</a>
             </li>
             
         }
-</ul>
+    </ul>
+</div>
+
+
 
 @code {
     public Todo newTodo = new Todo();
